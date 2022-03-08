@@ -189,6 +189,8 @@ for i = #tasks_to_run, 1, -1 do
 	env.current_task = t.name
 
 	for j = 1, #t.on_run do
+		term.setBackgroundColour(colours.black)
+		term.setTextColour(colours.white)
 		if not run_with_stacktrace(t.on_run[j], { ctx }, t.name, env.tasks_length, function(err)
 			shared_print(t.name, env.tasks_length, colours.red, tostring(err))
 		end) then error() end

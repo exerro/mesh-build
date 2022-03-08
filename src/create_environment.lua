@@ -52,7 +52,7 @@ return function(allow_unsafe, allow_remote, verbose, root_dir, args)
 	env.MESH_MISSING_ENV = {}
 
 	env.tasks = tasks_interface
-	env.require = create_require(root_dir, env, allow_remote)
+	env.require = create_require(root_dir, env, allow_remote, env.print_debug)
 
 	env.Configuration = create_configuration
 	env.Path = create_path(root_dir)

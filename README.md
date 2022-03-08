@@ -16,31 +16,34 @@ Typical usage involves running
 An example `build.mesh.lua` file might look like
 
 ```lua
-require "lua_run@exerro:mesh-build:main"
+require "include/default@exerro:mesh-build:main"
 
-function tasks:setup()
-	Path("src").move_to("out")
-end
+tasks.setup.config {
+	from = MESH_ROOT_PATH / "src",
+	to = MESH_ROOT_PATH / "build/src",
+}
 
-function tasks:minify()
-	for lua_file in Path("out/**.lua").find_iterator() do
-		minify_lua_file(lua_file)
-	end
-end
+tasks.check.config {
+	include = MESH_ROOT_PATH / "build/src/**.lua",
+}
 
-function tasks:build()
+tasks.minify.config {
+	include = MESH_ROOT_PATH / "build/src/**.lua",
+}
 
-end
+tasks.build.config {
+	require_path = MESH_ROOT_PATH / "build/src",
+	entry_path = MESH_ROOT_PATH / "build/src/main.lua",
+	output_path = MESH_ROOT_PATH / "build/main.lua",
+}
 
-function tasks:clean()
-	Path("out").delete()
-end
+tasks.run.config {
+	script_path = MESH_ROOT_PATH / "build/main.lua"
+}
 
-tasks.run:extends_from "lua_run::run"
-tasks.run.config { main = "main", root = "build" }
-tasks.minify:depends_on(tasks.setup)
-tasks.build:depends_on(tasks.minify)
-tasks.run:depends_on(tasks.build)
+tasks.clean.config {
+	path = MESH_ROOT_PATH / "build"
+}
 ```
 
 You'd run this with

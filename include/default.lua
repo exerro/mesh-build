@@ -24,8 +24,8 @@ tasks.build:extends_from "lua:assemble"
 tasks.build:depends_on(tasks.minify)
 tasks.build.config {
 	require_path = MESH_ROOT_PATH / "build/src",
-	output_path = MESH_ROOT_PATH / "build/main.lua",
 	entry_path = MESH_ROOT_PATH / "build/src/main.lua",
+	output_path = MESH_ROOT_PATH / "build/main.lua",
 }
 
 tasks.run:extends_from "lua:run"
@@ -34,6 +34,7 @@ tasks.run.config {
 	script_path = MESH_ROOT_PATH / "build/main.lua"
 }
 
-tasks.clean:extends_from "mesh:clean" {
+tasks.clean:extends_from "mesh:clean"
+tasks.clean.config {
 	path = MESH_ROOT_PATH / "build"
 }

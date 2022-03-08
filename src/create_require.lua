@@ -3,7 +3,7 @@ local fs_normalise = require "util" .fs_normalise
 
 local CACHE_ROOT = "/.mesh-build/"
 
-return function(root_dir, env, allow_remote)
+return function(root_dir, env, allow_remote, print_debug)
 	local loaded_modules = {}
 	local create_require
 
@@ -19,7 +19,7 @@ return function(root_dir, env, allow_remote)
 	local function load_module(module, relative_to)
 		if module:find "^%.+/" then
 			-- TODO: gotta think about . replacement etc
-			return load_module(fs_normalise(relative_to .. "/" .. module), relative_to)
+			return load_module(relative_to .. "/" .. module, relative_to)
 		elseif module:find "^https?://" then
 			if not allow_remote then
 				error("Remote scripts are not allowed in this build: " .. module, 3)
@@ -28,12 +28,26 @@ return function(root_dir, env, allow_remote)
 				"[:/]", function(match)
 					return "&" .. tostring(match:byte())
 				end)
-			
+
 			local cache_file_path = CACHE_ROOT .. cache_file_name
-			local h = fs.open(cache_file_path, "r") or http.get(module)
-				or error("Failed to load module '" .. module .. "'", 3)
+			local h = fs.open(cache_file_path, "r")
+			local is_cached = h ~= nil
+
+			h = h or http.get(module) or http.get(module .. ".lua")
+				  or error("Failed to load module '" .. module .. "'", 3)
 			local content = h.readAll()
 			h.close()
+
+			if is_cached then
+				print_debug("Using cached content for '" .. module .. "' (" .. cache_file_path .. ")")
+			else
+				print_debug("'" .. module .. "' is not currently cached... using remote")
+				h = fs.open(cache_file_path, "w")
+				if h then
+					h.write(content)
+					h.close()
+				end
+			end
 
 			return load_module_src(module, content, module)
 		elseif module:find "@" then
@@ -44,7 +58,7 @@ return function(root_dir, env, allow_remote)
 			end
 			local file_path = file_part:gsub("%.", "/") .. ".lua"
 			local url = "https://raw.githubusercontent.com/" .. username .. "/" .. repo .. "/" .. branch .. "/" .. file_path
-			return load_module(url, TODO())
+			return load_module(url, TODO)
 		else
 			local module_path_b = module:gsub("%.", "/") .. ".lua"
 			local module_path_a = fs.combine(root_dir, module_path_b)

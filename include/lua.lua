@@ -2,14 +2,18 @@
 tasks["lua:run"] = function(self)
 	print_info("Running script: '" .. tostring(self.config.script_path) .. "'")
 
+	local env = mesh_get_parent_environment()
 	local content = self.config.script_path.read(true)
-	local f, err = load(content, tostring(self.config.script_path), nil, mesh_get_parent_environment())
+	local f, err = load(content, tostring(self.config.script_path), nil, env)
 	
 	if not f then
 		print_error(err)
 		cancel_build()
 		return
 	end
+
+	env.term.setBackgroundColour(colours.black)
+	env.term.setTextColour(colours.white)
 
 	-- TODO: run with stacktrace
 	local ok, err = pcall(f)
