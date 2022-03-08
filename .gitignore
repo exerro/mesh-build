@@ -1,0 +1,5 @@
+# mesh-build build/built files
+/build/
+
+# IDE settings
+/.vscode
