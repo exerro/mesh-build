@@ -1,21 +1,38 @@
 
 local function fs_normalise(path)
-	return path
-		:gsub("//+", "/")
-		:gsub("^/", "")
-		:gsub("/$", "")
-		:gsub("/%./", "/")
-		:gsub("^%./", "")
-		:gsub("/%.$", "")
-		:gsub("^%.$", "")
-		:gsub("/[^/]+/%.%./", "/")
-		:gsub("^[^/]+/%.%./", "")
-		:gsub("/[^/]+/%.%.$", "")
-		:gsub("^[^/]+/%.%.$", "")
-		:gsub("/%.%./", "")
-		:gsub("^%.%./", "")
-		:gsub("/%.%.$", "")
-		:gsub("^%.%.$", "")
+	local parts = {}
+	local i = 1
+
+	for part in path:gmatch "[^/]+" do
+		parts[i] = part
+		i = i + 1
+	end
+
+	local i = 1
+
+	while i < #parts do
+		if parts[i + 1] == ".." then
+			table.remove(parts, i + 1)
+			table.remove(parts, i)
+			i = i - 2
+		elseif parts[i] == "." then
+			table.remove(parts, i)
+		end
+		i = i + 1
+	end
+
+	while i > 1 do
+		if parts[i] == ".." then
+			table.remove(parts, i)
+			table.remove(parts, i - 1)
+			i = i - 1
+		elseif parts[i] == "." then
+			table.remove(parts, i)
+		end
+		i = i - 1
+	end
+
+	return table.concat(parts, "/")
 end
 
 local function shared_print(task, len, colour, ...)
